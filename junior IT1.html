@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crypto Dollar Clicker | 💰 O'yin</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            user-select: none;
+        }
+        body {
+            background: radial-gradient(circle, #0a2f1d 0%, #05140b 100%);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .game-container {
+            background: rgba(255, 255, 255, 0.03);
+            border: 2px solid #2ecc71;
+            border-radius: 30px;
+            width: 100%;
+            max-width: 420px;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        /* Yuqori Stats */
+        .header-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+            background: rgba(0,0,0,0.4);
+            padding: 10px 15px;
+            border-radius: 15px;
+            font-size: 13px;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+        }
+        .stat-box span { color: #2ecc71; font-weight: bold; }
+
+        /* Asosiy Pul balansi */
+        .score-title {
+            font-size: 14px;
+            color: #aaa;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        .score-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 8px;
+            margin: 10px 0 25px 0;
+        }
+        .score-num {
+            font-size: 45px;
+            font-weight: 900;
+            color: #2ecc71;
+            text-shadow: 0 0 20px rgba(46, 204, 113, 0.4);
+        }
+
+        /* TANGA (KLIKER JOYI) */
+        .clicker-area {
+            position: relative;
+            width: 220px;
+            height: 220px;
+            margin: 0 auto 30px auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .circle-bg {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(46, 204, 113, 0.3) 0%, rgba(0,0,0,0) 70%);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+            z-index: 1;
+        }
+        .main-button {
+            width: 190px;
+            height: 190px;
+            background: linear-gradient(135deg, #2ecc71, #27ae60);
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 95px;
+            cursor: pointer;
+            z-index: 2;
+            transition: transform 0.05s ease;
+        }
+        .main-button:active {
+            transform: scale(0.92);
+        }
+
+        /* Energiya Bar */
+        .energy-section {
+            margin-bottom: 25px;
+        }
+        .energy-text {
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+            margin-bottom: 5px;
+            color: #ddd;
+        }
+        .energy-container {
+            background: rgba(255,255,255,0.1);
+            height: 14px;
+            border-radius: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            overflow: hidden;
+        }
+        .energy-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #2ecc71, #1abc9c);
+            width: 100%;
+            transition: width 0.1s linear;
+        }
+
+        /* Biznes do'koni */
+        .shop-title {
+            font-size: 16px;
+            text-align: left;
+            margin-bottom: 10px;
+            color: #2ecc71;
+            border-bottom: 1px solid rgba(46, 204, 113, 0.3);
+            padding-bottom: 5px;
+        }
+        .upgrades-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-height: 160px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+        .upgrade-card {
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 10px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upgrade-card:hover {
+            background: rgba(46, 204, 113, 0.15);
+            border-color: #2ecc71;
+        }
+        .upgrade-info {
+            text-align: left;
+        }
+        .upgrade-name { font-weight: bold; font-size: 14px; }
+        .upgrade-desc { font-size: 11px; color: #aaa; }
+        .upgrade-cost {
+            background: #2ecc71;
+            color: #05140b;
+            padding: 5px 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 13px;
+        }
+
+        /* Uchib chiquvchi yashil pul effekti */
+        .floating-text {
+            position: absolute;
+            color: #2ecc71;
+            font-size: 30px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 10;
+            animation: floatUp 0.6s ease-out forwards;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-120px) scale(0.85); }
+        }
+        @keyframes pulse {
+            0% { transform: scale(0.96); opacity: 0.4; }
+            50% { transform: scale(1.04); opacity: 0.7; }
+            100% { transform: scale(0.96); opacity: 0.4; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="game-container">
+        
+        <!-- Yuqori ma'lumotlar -->
+        <div class="header-stats">
+            <div class="stat-box">Har bir klik: <span id="mult-display">+$1</span></div>
+            <div class="stat-box">Avto biznes: <span id="pps-display">+$0/s</span></div>
+        </div>
+
+        <!-- Umumiy Pul -->
+        <p class="score-title">Sizning Balansingiz</p>
+        <div class="score-container">
+            <span class="score-num">$<span id="score-display">0</span></span>
+        </div>
+
+        <!-- Tanga (Kliker maydoni) -->
+        <div class="clicker-area">
+            <div class="circle-bg"></div>
+            <div class="main-button" id="click-btn">🪙</div>
+        </div>
+
+        <!-- Energiya qismi -->
+        <div class="energy-section">
+            <div class="energy-text">
+                <span>⚡ Energiya</span>
+                <span><span id="energy-current">1000</span>/<span id="energy-max">1000</span></span>
+            </div>
+            <div class="energy-container">
+                <div class="energy-bar" id="energy-bar"></div>
+            </div>
+        </div>
+
+        <!-- Do'kon (Bizneslarni rivojlantirish) -->
+        <h3 class="shop-title">Biznes do'koni (Upgrades)</h3>
+        <div class="upgrades-grid">
+            
+            <!-- 1-Upgrade: Klikni kuchaytirish -->
+            <div class="upgrade-card" onclick="buyUpgrade('click')">
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Tezkor barmoq (Click)</div>
+                    <div class="upgrade-desc">Har bir bosishga +$1 pul qo'shadi</div>
+                </div>
+                <div class="upgrade-cost">$<span id="cost-click">50</span></div>
+            </div>
+
+            <!-- 2-Upgrade: Avtomatik daromad -->
+            <div class="upgrade-card" onclick="buyUpgrade('idle')">
+                <div class="upgrade-info">
+                    <div class="upgrade-name">Kichik Do'kon (Idle)</div>
+                    <div class="upgrade-desc">Soniyasiga +$2 avtomatik pul keladi</div>
+                </div>
+                <div class="upgrade-cost">$<span id="cost-idle">150</span></div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        // LocalStoragedan yuklash yoki noldan boshlash
+        let score = parseFloat(localStorage.getItem('money_score')) || 0;
+        let clickMultiplier = parseInt(localStorage.getItem('money_mult')) || 1;
+        let idleIncome = parseInt(localStorage.getItem('money_idle')) || 0;
+        
+        let maxEnergy = 1000;
+        let currentEnergy = parseInt(localStorage.getItem('money_energy')) || 1000;
+        let lastSaveTime = parseInt(localStorage.getItem('money_last_time')) || Date.now();
+
+        // Narxlar
+        let costClick = parseInt(localStorage.getItem('money_cost_click')) || 50;
+        let costIdle = parseInt(localStorage.getItem('money_cost_idle')) || 150;
+
+        const clickBtn = document.getElementById('click-btn');
+        const scoreDisplay = document.getElementById('score-display');
+        const energyCurrent = document.getElementById('energy-current');
+        const energyBar = document.getElementById('energy-bar');
+
+        // Sayt ochilganda offline pulni hisoblash (Koinot energiyasi effekti)
+        window.onload = function() {
+            let now = Date.now();
+            let passedSeconds = Math.floor((now - lastSaveTime) / 1000);
+
+            // Offline progress tizimi
+            if (passedSeconds > 0 && idleIncome > 0) {
+                let offlineEarned = passedSeconds * idleIncome;
+                score += offlineEarned;
+                alert(`💰 Bizneslar hisoboti!\n\nSiz yo'qligingizda do'konlaringiz ishladi va +$${offlineEarned.toLocaleString()} foyda keltirdi!`);
+            }
+
+            // Energiyani ham vaqtga qarab to'ldirish (+3 energiya / soniya)
+            if (passedSeconds > 0) {
+                currentEnergy = Math.min(maxEnergy, currentEnergy + (passedSeconds * 3));
+            }
+
+            updateUI();
+
+            // Har soniyada avto-daromad va energiyani yangilash
+            setInterval(() => {
+                score += idleIncome;
+                
+                if (currentEnergy < maxEnergy) {
+                    currentEnergy = Math.min(maxEnergy, currentEnergy + 3);
+                }
+
+                updateUI();
+                saveGame();
+            }, 1000);
+        };
+
+        // Tangani bosganda pul beradigan qism
+        clickBtn.addEventListener('click', (e) => {
+            if (currentEnergy >= clickMultiplier) {
+                currentEnergy -= clickMultiplier;
+                score += clickMultiplier;
+
+                // Uchib chiquvchi pul matni
+                createFloatingText(e.clientX, e.clientY, `+$${clickMultiplier}`);
+                updateUI();
+            } else {
+                // Energiya tugaganda qizil chiroq effekti
+                clickBtn.style.background = "linear-gradient(135deg, #e74c3c, #c0392b)";
+                setTimeout(() => {
+                    clickBtn.style.background = "linear-gradient(135deg, #2ecc71, #27ae60)";
+                }, 800);
+            }
+        });
+
+        // Pullarni uchirish effekti
+        function createFloatingText(x, y, text) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.innerText = text;
+            el.style.left = `${x - 20}px`;
+            el.style.top = `${y - 40}px`;
+            document.body.appendChild(el);
+
+            setTimeout(() => { el.remove(); }, 600);
+        }
+
+        // Do'kondan biznes sotib olish
+        function buyUpgrade(type) {
+            if (type === 'click' && score >= costClick) {
+                score -= costClick;
+                clickMultiplier += 1;
+                costClick = Math.floor(costClick * 1.6); // Har gal narx 1.6 barobar oshadi
+            } else if (type === 'idle' && score >= costIdle) {
+                score -= costIdle;
+                idleIncome += 2; // Soniyasiga +2 tadan pul qo'shadi
+                costIdle = Math.floor(costIdle * 1.7);
+            } else {
+                alert("Mablag' yetarli emas!");
+                return;
+            }
+            updateUI();
+            saveGame();
+        }
+
+        // Ekranni yangilash
+        function updateUI() {
+            scoreDisplay.innerText = Math.floor(score).toLocaleString();
+            energyCurrent.innerText = currentEnergy;
+            
+            let energyPercent = (currentEnergy / maxEnergy) * 100;
+            energyBar.style.width = `${energyPercent}%`;
+
+            document.getElementById('cost-click').innerText = costClick.toLocaleString();
+            document.getElementById('cost-idle').innerText = costIdle.toLocaleString();
+            
+            document.getElementById('mult-display').innerText = `+$${clickMultiplier}`;
+            document.getElementById('pps-display').innerText = `+$${idleIncome}/s`;
+        }
+
+        // Brauzer xotirasiga saqlash
+        function saveGame() {
+            localStorage.setItem('money_score', score);
+            localStorage.setItem('money_mult', clickMultiplier);
+            localStorage.setItem('money_idle', idleIncome);
+            localStorage.setItem('money_energy', currentEnergy);
+            localStorage.setItem('money_cost_click', costClick);
+            localStorage.setItem('money_cost_idle', costIdle);
+            localStorage.setItem('money_last_time', Date.now().toString());
+        }
+    </script>
+</body>
+</html>
